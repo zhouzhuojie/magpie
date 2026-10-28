@@ -171,6 +171,10 @@ func TestRedactedRequest(t *testing.T) {
 	}
 }
 
+// solKey is a Solana secret key's shape, 88 base58 characters, made here
+// rather than written out.
+var solKey = strings.Repeat("3uH1qMVtF6MAZjDtb9zq6bNg31vXvtGNiF5gZJ6ttKL6", 2)[:88]
+
 func TestCountTokensRedacted(t *testing.T) {
 	const key = "sk-proj-abcdEFGH1234ijklMNOP5678qrst"
 	cases := []struct {
@@ -181,6 +185,9 @@ func TestCountTokensRedacted(t *testing.T) {
 	}{
 		{"secrets", settings.Settings{Redact: true}, key, "{{API_KEY_"},
 		{"personal", settings.Settings{RedactPersonal: true}, "13812345678", "{{PHONE_"},
+		{"crypto", settings.Settings{RedactCrypto: true}, solKey, "{{SOLANA_KEY_"},
+		// the switch off, the same key goes as written
+		{"crypto_off", settings.Settings{Redact: true, RedactPersonal: true}, solKey, ""},
 		{"words", settings.Settings{RedactWords: []string{"Nightjar"}}, "Nightjar", "{{TERM_"},
 		// a word in other capitals only when the user asked for any case
 		{"words_as_written", settings.Settings{RedactWords: []string{"Nightjar"}}, "NIGHTJAR", ""},

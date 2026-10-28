@@ -140,7 +140,7 @@ func (o Options) coversKind(kind string) bool {
 // knownSpans are where s has a known value o masks (coversKind). Where two
 // start at the same place, the longer.
 func knownSpans(s string, o Options) []span {
-	if !o.Secrets && !o.Personal || len(s) < minKnown {
+	if !o.Secrets && !o.Personal && !o.Crypto || len(s) < minKnown {
 		return nil
 	}
 	mu.RLock()
@@ -235,7 +235,7 @@ var sentKnown struct {
 // sentKnownSpans is knownSpans for text going to a vendor: the same as the
 // first time s was masked under what o covers.
 func sentKnownSpans(s string, o Options) []span {
-	if !o.Secrets && !o.Personal || len(s) < minKnown {
+	if !o.Secrets && !o.Personal && !o.Crypto || len(s) < minKnown {
 		return nil
 	}
 	h := sha256.New()

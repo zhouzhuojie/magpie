@@ -22,7 +22,7 @@ type Masker struct{}
 
 // Wanted says settings st ask for anything to be masked.
 func Wanted(st settings.Settings) bool {
-	return st.Redact || st.RedactPersonal || len(st.RedactWords) > 0
+	return st.Redact || st.RedactPersonal || st.RedactCrypto || len(st.RedactWords) > 0
 }
 
 func options() redact.Options { return optionsCtx(context.Background()) }
@@ -30,7 +30,7 @@ func options() redact.Options { return optionsCtx(context.Background()) }
 // optionsCtx is options with the model's wait ending with ctx.
 func optionsCtx(ctx context.Context) redact.Options {
 	st := settings.Shared()
-	o := redact.Options{Secrets: st.Redact, Personal: st.RedactPersonal, Kinds: st.RedactKinds, Words: st.RedactWords, WordsAnyCase: st.RedactWordsAnyCase, WordsWhole: st.RedactWordsWhole, Rules: st.RedactRules,
+	o := redact.Options{Secrets: st.Redact, Personal: st.RedactPersonal, Crypto: st.RedactCrypto, Kinds: st.RedactKinds, Words: st.RedactWords, WordsAnyCase: st.RedactWordsAnyCase, WordsWhole: st.RedactWordsWhole, Rules: st.RedactRules,
 		Actions: st.RedactActions, Allow: st.RedactAllow, Shape: st.RedactShape}
 	if st.RedactModel {
 		m := picked(st)
@@ -122,7 +122,7 @@ func busy(st pii.Status) string {
 
 func (Masker) JSON(body []byte) ([]byte, int) {
 	o := options()
-	if !o.Secrets && !o.Personal && len(o.Words) == 0 {
+	if !o.Secrets && !o.Personal && !o.Crypto && len(o.Words) == 0 {
 		return body, 0
 	}
 	return redact.MaskJSON(body, o)
@@ -139,7 +139,7 @@ func (m Masker) JSONHits(body []byte) ([]byte, []gwmw.Hit) {
 // (gwmw.ContextTeller).
 func (Masker) JSONHitsContext(ctx context.Context, body []byte) ([]byte, []gwmw.Hit) {
 	o := optionsCtx(ctx)
-	if !o.Secrets && !o.Personal && len(o.Words) == 0 {
+	if !o.Secrets && !o.Personal && !o.Crypto && len(o.Words) == 0 {
 		return body, nil
 	}
 	var hits []gwmw.Hit
@@ -179,7 +179,7 @@ func told(hits *[]gwmw.Hit) func(redact.Hit) {
 // user can try it first.
 func Preview(s string) (out string, hits []gwmw.Hit, off bool) {
 	o := options()
-	if !o.Secrets && !o.Personal && len(o.Words) == 0 {
+	if !o.Secrets && !o.Personal && !o.Crypto && len(o.Words) == 0 {
 		o.Secrets, o.Personal, off = true, true, true
 	}
 	o.Seen = told(&hits)

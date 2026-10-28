@@ -68,7 +68,7 @@ function maskLoad(force) {
 const maskSettings = () => prefs || state?.settings || {};
 // on as the masker is (masking.Wanted): your own words mask with neither
 // switch on
-const maskOn = () => { const s = maskSettings(); return !!(s.redact || s.redactPersonal || s.redactWords?.length); };
+const maskOn = () => { const s = maskSettings(); return !!(s.redact || s.redactPersonal || s.redactCrypto || s.redactWords?.length); };
 
 function maskPageOpen() {
   if (!providers && !maskProvAsked) {

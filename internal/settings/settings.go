@@ -117,8 +117,14 @@ type Settings struct {
 	RedactModel      bool               `json:"redactModel,omitempty"`
 	RedactModelName  string             `json:"redactModelName,omitempty"`
 	RedactPersonal   bool               `json:"redactPersonal,omitempty"`
-	RedactKinds      map[string]bool    `json:"redactKinds,omitempty"`
-	RedactWords      []string           `json:"redactWords,omitempty"`
+	// RedactCrypto masks crypto wallet private keys as well, by their own
+	// shapes (redact.Options.Crypto): Bitcoin's WIF, BIP32's xprv, a Solana
+	// key, a seed phrase, and the rest of internal/redact/crypto.go. Off
+	// until turned on: two of the shapes are also transaction hashes and
+	// signatures, which a vendor then cannot read.
+	RedactCrypto bool            `json:"redactCrypto,omitempty"`
+	RedactKinds  map[string]bool `json:"redactKinds,omitempty"`
+	RedactWords  []string        `json:"redactWords,omitempty"`
 	// RedactWordsAnyCase matches RedactWords in any case (ZoeCats on
 	// Discord); off, the default, a word is matched as written.
 	RedactWordsAnyCase bool `json:"redactWordsAnyCase,omitempty"`

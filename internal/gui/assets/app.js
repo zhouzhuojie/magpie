@@ -21873,6 +21873,10 @@ function renderRedact(s, keep) {
     r.append(who, val);
     box.append(r);
   }
+  // crypto wallet keys, a switch of their own: two of their shapes are also
+  // transaction hashes and signatures, so they start off
+  row(t("Mask crypto wallet keys"), t("Private keys of Bitcoin, Ethereum, Solana and other wallets go to vendors as placeholders. Off by default: transaction hashes and signatures are masked too"),
+    onOff(s.redactCrypto, (redactCrypto) => savePrefs({ ...keep, redactCrypto }))).id = "redactCryptoRow";
   const words = (s.redactWords || []).join(", ");
   const i = input(words, t("names, codenames, hosts"));
   i.className = "words";
@@ -21894,9 +21898,12 @@ function renderRedact(s, keep) {
   renderMaskTry(s);
   // how it is found: the local model, for what no pattern can tell, over
   // the rules on every request that masks anything
-  const masking = s.redact || s.redactPersonal;
+  const masking = s.redact || s.redactPersonal || s.redactCrypto;
+  // the model finds names and addresses, so it runs under those two and not
+  // under crypto wallet keys, whose shapes the rules know
+  const modelOn = s.redact || s.redactPersonal;
   const why = t("Turn on Mask secrets or Mask personal data first");
-  privacyModelRow(find, masking ? "" : why);
+  privacyModelRow(find, modelOn ? "" : why);
   const always = el("span", "static-pill" + (masking ? " on" : ""), masking ? t("Always on") : t("Off"));
   rowIn(find, t("Rules"), masking ? t("Keys, tokens, emails and numbers whose checksum adds up: patterns that are certain, checked on every request") : why, always).id = "maskRulesRow";
   // Routing's and Usage's Hide accounts, here too, where privacy is looked for
@@ -22228,6 +22235,7 @@ function renderRedactRules(s, row) {
 // The secrets, the user's own rules' kinds and any kind already set are
 // shown; the rest wait behind "Show all kinds".
 const MASK_SECRET_KINDS = ["API_KEY", "PRIVATE_KEY", "TOKEN", "PASSWORD", "SECRET"];
+const MASK_CRYPTO_KINDS = ["WALLET_KEY", "WIF_KEY", "BIP32_KEY", "SOLANA_KEY", "SOLANA_KEYPAIR", "NEAR_KEY", "SUI_KEY", "APTOS_KEY", "STELLAR_KEY", "NOSTR_KEY", "AGE_KEY", "ZCASH_KEY", "SEED_PHRASE"];
 const MASK_PERSONAL_KINDS = ["EMAIL", "PHONE", "ID_CARD", "BANK_CARD", "PERSON", "ADDRESS", "ACCOUNT", "SSN", "PASSPORT", "IBAN", "BIRTHDAY", "MAC", "SERIAL", "USERNAME", "HOSTNAME", "IP", "BUCKET"];
 const MASK_ACT_SUB = {
   mask: "Goes to the vendor as a placeholder, and comes back as it was",
@@ -22250,6 +22258,7 @@ function maskActKinds(s) {
     for (const k of MASK_SECRET_KINDS) add(k, true);
     for (const r of s.redactRules || []) add(maskRuleKind(r.kind), true);
   }
+  if (s.redactCrypto) for (const k of MASK_CRYPTO_KINDS) add(k, true);
   if (s.redactWords?.length) add("TERM", true);
   if (s.redactPersonal) for (const k of MASK_PERSONAL_KINDS) add(k, false);
   // a choice kept for a kind not masked now stays in view, to be undone
@@ -22749,7 +22758,7 @@ function prefsKeep(s) {
     uiFont: s.uiFont || null, codeFont: s.codeFont || null,
     otel: s.otel || {},
     trayUsages: s.trayUsages || [],
-    redact: !!s.redact, redactPersonal: !!s.redactPersonal, redactKinds: s.redactKinds || {}, redactWords: s.redactWords || [], redactWordsAnyCase: !!s.redactWordsAnyCase, redactWordsWhole: !!s.redactWordsWhole, redactShape: !!s.redactShape, codexWarmup: s.codexWarmup || "",
+    redact: !!s.redact, redactPersonal: !!s.redactPersonal, redactCrypto: !!s.redactCrypto, redactKinds: s.redactKinds || {}, redactWords: s.redactWords || [], redactWordsAnyCase: !!s.redactWordsAnyCase, redactWordsWhole: !!s.redactWordsWhole, redactShape: !!s.redactShape, codexWarmup: s.codexWarmup || "",
     claudeWarmup: s.claudeWarmup || "", codexWarmAt: s.codexWarmAt || "", claudeWarmAt: s.claudeWarmAt || "",
     codexWarmAts: warmTimes(s.codexWarmAts, s.codexWarmAt), claudeWarmAts: warmTimes(s.claudeWarmAts, s.claudeWarmAt), workbuddyCheckin: !!s.workbuddyCheckin, traeCheckin: !!s.traeCheckin, minimaxCheckin: !!s.minimaxCheckin, qoderCheckin: !!s.qoderCheckin, noStats: !!s.noStats, noUsageStats: !!s.noUsageStats,
     memberModel: !!s.memberModel, noLoopGuard: !!s.noLoopGuard, claudeLeanPrompt: !!s.claudeLeanPrompt, refusalRetries: s.refusalRetries ?? null,

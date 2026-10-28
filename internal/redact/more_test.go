@@ -222,7 +222,9 @@ func TestCategoryDefaults(t *testing.T) {
 	}
 	for k, cats := range kindCats {
 		for _, cat := range cats {
-			if cat != catPersonal && !seen[cat] {
+			// crypto wallet keys are a category with a switch of their own
+			// (Options.Crypto), not one of the personal data kinds
+			if cat != catPersonal && cat != catCrypto && !seen[cat] {
 				t.Errorf("%s is found under %q, which isn't one of Categories", k, cat)
 			}
 		}
