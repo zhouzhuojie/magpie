@@ -194,7 +194,7 @@ var rules = append([]rule{
 	{kind: "ID_CARD", re: regexp.MustCompile(`[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]`), bound: alnum, ok: chineseID, cat: catPersonal},
 	{kind: "PHONE", re: regexp.MustCompile(`(?:\+?86[- ]?)?1[3-9]\d{9}`), bound: alnum, at: phoneAt, cat: catPersonal},
 	{kind: "BANK_CARD", re: regexp.MustCompile(`[3-6]\d{3}(?:[ -]?\d{4}){2,3}(?:[ -]?\d{1,3})?`), bound: alnum, ok: luhn, cat: catPersonal},
-}, moreRules...)
+}, append(moreRules, cryptoRules...)...)
 
 // cjkPasswordNames are what a password is called in Chinese, Japanese and
 // Korean.

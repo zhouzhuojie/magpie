@@ -181,6 +181,9 @@ func TestCountTokensRedacted(t *testing.T) {
 	}{
 		{"secrets", settings.Settings{Redact: true}, key, "{{API_KEY_"},
 		{"personal", settings.Settings{RedactPersonal: true}, "13812345678", "{{PHONE_"},
+		{"crypto", settings.Settings{Redact: true}, strings.Repeat("3uH1qMVt", 11), "{{SOLANA_KEY_"},
+		// the switch off, the same key goes as written
+		{"crypto_off", settings.Settings{RedactPersonal: true}, strings.Repeat("3uH1qMVt", 11), ""},
 		{"words", settings.Settings{RedactWords: []string{"Nightjar"}}, "Nightjar", "{{TERM_"},
 		// a word in other capitals only when the user asked for any case
 		{"words_as_written", settings.Settings{RedactWords: []string{"Nightjar"}}, "NIGHTJAR", ""},
